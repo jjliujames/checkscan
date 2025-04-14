@@ -72,11 +72,42 @@ const handleFileUpload = async (event) => {
   question.value = ''
   previewImage.value = null  // Clear existing preview
 
+  // Check file type
+  const fileType = file.type.toLowerCase()
+  const fileName = file.name.toLowerCase()
+
   // Create preview
   const reader = new FileReader()
 
   reader.onload = (e) => {
-    previewImage.value = e.target.result
+    // For TIFF files, we need to create a temporary img element to convert it
+    if (fileName.endsWith('.tif') || fileName.endsWith('.tiff') || fileType === 'image/tiff') {
+      const img = new Image()
+      img.onload = () => {
+        // Create a canvas to convert the image
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+
+        // Convert to JPEG format
+        try {
+          previewImage.value = canvas.toDataURL('image/jpeg', 0.9)
+        } catch (err) {
+          error.value = 'Error converting TIFF image for preview'
+          previewImage.value = null
+        }
+      }
+      img.onerror = () => {
+        error.value = 'Error loading TIFF image'
+        previewImage.value = null
+      }
+      img.src = e.target.result
+    } else {
+      // For other image types, use the result directly
+      previewImage.value = e.target.result
+    }
   }
 
   reader.onerror = () => {
