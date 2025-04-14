@@ -8,4 +8,4 @@
       <span class="text-sm text-gray-400">Check Payee Scan Tool</span>
     </div>
   </div>
-</template> 
+</template>
